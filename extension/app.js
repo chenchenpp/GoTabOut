@@ -663,13 +663,13 @@ async function renderTabList() {
 
   // Render all chips + the More button (hidden initially)
   const allItems = settings.tabListItems;
-  let html = allItems.map(item => {
+  let html = allItems.map((item, idx) => {
     let hostname = '';
     try { hostname = new URL(item.url).hostname; } catch {}
     const faviconUrl = faviconFor(hostname, '');
     const safeUrl = item.url.replace(/"/g, '&quot;');
     const safeTitle = (item.title || item.url).replace(/"/g, '&quot;');
-    return `<a href="${safeUrl}" target="_blank" rel="noopener" class="tab-list-chip" title="${safeTitle}">
+    return `<a href="${safeUrl}" target="_blank" rel="noopener" class="tab-list-chip" draggable="true" data-nav-index="${idx}" title="${safeTitle}">
       ${faviconUrl ? `<span class="chip-favicon" style="background-image:url('${faviconUrl}')" aria-hidden="true"></span>` : ''}
       <span class="chip-text">${safeTitle}</span>
       <button class="nav-chip-close chip-action chip-close" data-action="remove-nav-item" data-nav-url="${safeUrl}" title="Remove" aria-label="Remove ${safeTitle}">${ICONS.chipClose}</button>
@@ -699,6 +699,52 @@ async function renderTabList() {
       if (_navListExpanded) {
         _navListExpanded = false;
         _reflowNavList();
+      }
+    });
+  });
+
+  // Bind drag events for reordering
+  let dragSrcIndex = null;
+  chips.forEach(chip => {
+    chip.addEventListener('dragstart', (e) => {
+      dragSrcIndex = parseInt(chip.dataset.navIndex, 10);
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', dragSrcIndex);
+      chip.classList.add('dragging');
+    });
+
+    chip.addEventListener('dragend', () => {
+      chip.classList.remove('dragging');
+      chips.forEach(c => c.classList.remove('drag-over'));
+    });
+
+    chip.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      chip.classList.add('drag-over');
+    });
+
+    chip.addEventListener('dragleave', () => {
+      chip.classList.remove('drag-over');
+    });
+
+    chip.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      chip.classList.remove('drag-over');
+      const targetIndex = parseInt(chip.dataset.navIndex, 10);
+
+      if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+
+      try {
+        const settings = await getSettings();
+        const items = [...settings.tabListItems];
+        const [moved] = items.splice(dragSrcIndex, 1);
+        items.splice(targetIndex, 0, moved);
+        settings.tabListItems = items;
+        await saveSettings(settings);
+        await renderTabList();
+      } catch (err) {
+        if (DEBUG) console.error('[tab-out] Failed to reorder nav items:', err);
       }
     });
   });

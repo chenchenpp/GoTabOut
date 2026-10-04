@@ -469,6 +469,16 @@ header {
   display: inline-flex;
 }
 
+/* Nav chip drag states */
+.tab-list-chip.dragging {
+  opacity: 0.4;
+}
+
+.tab-list-chip.drag-over {
+  border-color: var(--accent-amber);
+  background: rgba(200, 113, 58, 0.08);
+}
+
 .tab-list-more {
   display: inline-flex;
   align-items: center;
