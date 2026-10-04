@@ -161,6 +161,17 @@ async function dismissSavedTab(id) {
   }
 }
 
+// 获取deferred列表
+async function getDeferred() {
+  const { deferred = [] } = await chrome.storage.local.get('deferred');
+  return deferred;
+}
+
+// 保存deferred列表
+async function saveDeferred(deferred) {
+  await chrome.storage.local.set({ deferred });
+}
+
 
 // ─── UI helpers ─────────────────────────────────────────────────────────────
 
@@ -1022,12 +1033,53 @@ async function renderDeferredColumn() {
 
     if (active.length > 0) {
       countEl.textContent = `${active.length} item${active.length !== 1 ? 's' : ''}`;
+
+      // 加载自定义分组
+      await loadDeferredGroups();
+
+      // 按分组归类
+      const groupedItems = {};
+      const ungroupedItems = [];
+
+      for (const item of active) {
+        if (item.group) {
+          if (!groupedItems[item.group]) {
+            groupedItems[item.group] = [];
+          }
+          groupedItems[item.group].push(item);
+        } else {
+          ungroupedItems.push(item);
+        }
+      }
+
+      // 构建分组HTML
+      let groupsHtml = '';
+
+      // 先渲染自定义分组
+      for (const group of customDeferredGroups) {
+        const items = groupedItems[group.name] || [];
+        if (items.length > 0) {
+          groupsHtml += renderDeferredGroup(group.name, items);
+        }
+      }
+
+      // 渲染未分组
+      if (ungroupedItems.length > 0) {
+        groupsHtml += renderDeferredGroup('未分组', ungroupedItems);
+      }
+
       list.innerHTML = `
         <div class="bulk-actions">
           <button class="action-btn" data-action="open-all-deferred">${ICONS.focus} Open all</button>
           <button class="action-btn" data-action="clear-all-deferred">${ICONS.close} Clear all</button>
+          <button class="action-btn group-settings-btn" data-action="open-group-settings" aria-label="分组设置" title="分组设置">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.212 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
-        ${active.map(renderDeferredItem).join('')}
+        ${groupsHtml}
       `;
       list.style.display = 'block';
       empty.style.display = 'none';
@@ -1065,8 +1117,10 @@ function renderDeferredItem(item) {
 
   const safeTitle = (item.title || item.url).replace(/"/g, '&quot;');
   return `
-    <div class="deferred-item" data-deferred-id="${item.id}">
-      <input type="checkbox" class="deferred-checkbox" data-action="check-deferred" data-deferred-id="${item.id}" aria-label="Mark ${safeTitle} as done">
+    <div class="deferred-item" data-deferred-id="${item.id}" data-action="toggle-deferred-select">
+      <div class="deferred-checkbox-wrapper">
+        <div class="deferred-checkbox"></div>
+      </div>
       <div class="deferred-info">
         <a href="${item.url}" target="_blank" rel="noopener" class="deferred-title" title="${safeTitle}">
           ${faviconUrl ? `<span class="deferred-favicon" style="background-image:url('${faviconUrl}')" aria-hidden="true"></span>` : ''}${item.title || item.url}
@@ -1081,6 +1135,27 @@ function renderDeferredItem(item) {
     </div>`;
 }
 
+// 渲染分组模块
+function renderDeferredGroup(groupName, items) {
+  const groupId = 'group-' + groupName.replace(/[^a-z0-9]/g, '-');
+  const itemCount = items.length;
+
+  return `
+    <div class="deferred-group" data-group-name="${groupName}">
+      <div class="deferred-group-header" data-action="toggle-group" data-group-id="${groupId}">
+        <svg class="deferred-group-chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
+        <span class="deferred-group-name">${groupName}</span>
+        <span class="deferred-group-count">${itemCount}</span>
+      </div>
+      <div class="deferred-group-body" id="${groupId}">
+        ${items.map(renderDeferredItem).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function renderArchiveItem(item) {
   const ago = item.completedAt ? timeAgo(item.completedAt) : timeAgo(item.savedAt);
   return `
@@ -1091,6 +1166,265 @@ function renderArchiveItem(item) {
       <span class="archive-item-date">${ago}</span>
       <button class="deferred-dismiss" data-action="dismiss-deferred" data-deferred-id="${item.id}" aria-label="Remove ${(item.title || item.url).replace(/"/g, '&quot;')} from archive" title="Remove from archive">${ICONS.close}</button>
     </div>`;
+}
+
+
+// ─── 分组管理 ─────────────────────────────────────────────────────────────
+
+// 存储选中的deferred items
+const selectedDeferredIds = new Set();
+
+// 存储自定义分组
+let customDeferredGroups = [];
+
+/**
+ * 加载自定义分组
+ */
+async function loadDeferredGroups() {
+  try {
+    const result = await chrome.storage.local.get('deferredGroups');
+    customDeferredGroups = result.deferredGroups || [];
+  } catch (err) {
+    if (DEBUG) console.error('[tab-out] Failed to load deferred groups:', err);
+    customDeferredGroups = [];
+  }
+}
+
+/**
+ * 保存自定义分组
+ */
+async function saveDeferredGroups() {
+  try {
+    await chrome.storage.local.set({ deferredGroups: customDeferredGroups });
+  } catch (err) {
+    if (DEBUG) console.error('[tab-out] Failed to save deferred groups:', err);
+  }
+}
+
+/**
+ * 切换deferred item的选中状态
+ */
+function toggleDeferredSelection(deferredId) {
+  if (selectedDeferredIds.has(deferredId)) {
+    selectedDeferredIds.delete(deferredId);
+  } else {
+    selectedDeferredIds.add(deferredId);
+  }
+  updateDeferredSelectionUI();
+}
+
+/**
+ * 更新选中状态的UI
+ */
+function updateDeferredSelectionUI() {
+  // 更新所有deferred item的选中样式
+  document.querySelectorAll('.deferred-item').forEach(item => {
+    const id = item.dataset.deferredId;
+    if (selectedDeferredIds.has(id)) {
+      item.classList.add('selected');
+    } else {
+      item.classList.remove('selected');
+    }
+  });
+
+  // 更新分组设置按钮的状态
+  const settingsBtn = document.querySelector('[data-action="open-group-settings"]');
+  if (settingsBtn) {
+    if (selectedDeferredIds.size > 0) {
+      settingsBtn.classList.add('has-selection');
+    } else {
+      settingsBtn.classList.remove('has-selection');
+    }
+  }
+}
+
+/**
+ * 打开分组设置弹框
+ */
+async function openGroupSettingsModal() {
+  const modal = document.getElementById('groupSettingsModal');
+  if (!modal) return;
+
+  // 加载分组数据
+  await loadDeferredGroups();
+
+  // 更新选中的链接列表
+  updateSelectedLinksList();
+
+  // 更新分组标签列表
+  updateGroupTagsList();
+
+  modal.style.display = 'flex';
+}
+
+/**
+ * 关闭分组设置弹框
+ */
+function closeGroupSettingsModal() {
+  const modal = document.getElementById('groupSettingsModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+/**
+ * 更新选中的链接列表显示
+ */
+async function updateSelectedLinksList() {
+  const countEl = document.getElementById('selectedCount');
+  const listEl = document.getElementById('selectedLinksList');
+  const emptyEl = document.getElementById('selectedLinksEmpty');
+
+  if (!countEl || !listEl || !emptyEl) return;
+
+  countEl.textContent = selectedDeferredIds.size;
+
+  if (selectedDeferredIds.size === 0) {
+    emptyEl.style.display = 'block';
+    listEl.style.display = 'none';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  listEl.style.display = 'block';
+
+  // 获取选中的deferred items
+  const { active } = await getSavedTabs();
+  const selectedItems = active.filter(item => selectedDeferredIds.has(item.id));
+
+  listEl.innerHTML = selectedItems.map(item => {
+    const safeTitle = (item.title || item.url).replace(/"/g, '&quot;');
+    const currentGroup = item.group || '未分组';
+    return `
+      <div class="selected-link-item" data-deferred-id="${item.id}">
+        <span class="selected-link-title" title="${safeTitle}">${item.title || item.url}</span>
+        <span class="selected-link-group">${currentGroup}</span>
+        <button class="selected-link-remove" data-action="remove-selected-link" data-deferred-id="${item.id}" aria-label="取消选择">
+          ${ICONS.close}
+        </button>
+      </div>
+    `;
+  }).join('');
+}
+
+/**
+ * 更新分组标签列表
+ */
+function updateGroupTagsList() {
+  const listEl = document.getElementById('groupTagsList');
+  const emptyEl = document.getElementById('groupTagsEmpty');
+
+  if (!listEl || !emptyEl) return;
+
+  if (customDeferredGroups.length === 0) {
+    emptyEl.style.display = 'block';
+    listEl.style.display = 'none';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  listEl.style.display = 'flex';
+
+  listEl.innerHTML = customDeferredGroups.map(group => `
+    <div class="group-tag" data-group-name="${group.name}" data-action="select-group">
+      ${group.name}
+      <button class="group-tag-delete" data-action="delete-group" data-group-name="${group.name}" aria-label="删除分组">
+        ${ICONS.close}
+      </button>
+    </div>
+  `).join('');
+
+  // 绑定分组标签点击事件
+  listEl.querySelectorAll('.group-tag').forEach(tag => {
+    tag.addEventListener('click', (e) => {
+      // 如果点击的是删除按钮，不触发选中
+      if (e.target.closest('.group-tag-delete')) return;
+
+      const groupName = tag.dataset.groupName;
+      // 取消其他选中的分组
+      listEl.querySelectorAll('.group-tag').forEach(t => t.classList.remove('selected'));
+      // 选中当前分组
+      tag.classList.add('selected');
+    });
+  });
+}
+
+/**
+ * 添加新分组
+ */
+async function addNewGroup(groupName) {
+  if (!groupName || groupName.trim() === '') return;
+
+  // 检查是否已存在
+  if (customDeferredGroups.some(g => g.name === groupName)) {
+    showToast('分组已存在');
+    return;
+  }
+
+  customDeferredGroups.push({ name: groupName });
+  await saveDeferredGroups();
+  updateGroupTagsList();
+  showToast('分组已添加');
+}
+
+/**
+ * 删除分组
+ */
+async function deleteGroup(groupName) {
+  // 将该分组的所有链接归类到未分组
+  const deferred = await getDeferred();
+  const updated = deferred.map(item => {
+    if (item.group === groupName) {
+      const { group, ...rest } = item;
+      return rest;
+    }
+    return item;
+  });
+  await saveDeferred(updated);
+
+  // 删除分组
+  customDeferredGroups = customDeferredGroups.filter(g => g.name !== groupName);
+  await saveDeferredGroups();
+  updateGroupTagsList();
+  await renderDeferredColumn();
+  showToast('分组已删除，链接已移至未分组');
+}
+
+/**
+ * 保存选中的链接到指定分组
+ */
+async function saveSelectedToGroup(groupName) {
+  if (selectedDeferredIds.size === 0) {
+    showToast('请先选择链接');
+    return;
+  }
+
+  if (!groupName) {
+    showToast('请先选择分组');
+    return;
+  }
+
+  try {
+    const deferred = await getDeferred();
+    const savedCount = selectedDeferredIds.size;
+    const updated = deferred.map(item => {
+      if (selectedDeferredIds.has(item.id)) {
+        return { ...item, group: groupName };
+      }
+      return item;
+    });
+
+    await saveDeferred(updated);
+    showToast(`已保存 ${savedCount} 个链接到分组 "${groupName}"`);
+    selectedDeferredIds.clear();
+    updateDeferredSelectionUI();
+    closeGroupSettingsModal();
+    await renderDeferredColumn();
+  } catch (err) {
+    console.error('[tab-out] Failed to save selected to group:', err);
+    if (DEBUG) console.error('[tab-out] Failed to save to group:', err);
+    showToast('保存失败');
+  }
 }
 
 
@@ -1513,6 +1847,83 @@ document.addEventListener('click', async (e) => {
     return;
   }
 
+  // 展开/收起分组
+  if (action === 'toggle-group') {
+    const groupId = actionEl.dataset.groupId;
+    if (!groupId) return;
+    const body = document.getElementById(groupId);
+    const header = actionEl.closest('.deferred-group-header');
+    if (!body || !header) return;
+
+    if (body.style.display === 'none') {
+      body.style.display = 'block';
+      header.classList.remove('collapsed');
+    } else {
+      body.style.display = 'none';
+      header.classList.add('collapsed');
+    }
+    return;
+  }
+
+  // 切换deferred item的选中状态
+  if (action === 'toggle-deferred-select') {
+    // 如果点击的是链接或按钮，不触发选中
+    if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a') || e.target.closest('button')) {
+      return;
+    }
+    const item = actionEl.closest('.deferred-item');
+    if (!item) return;
+    const id = item.dataset.deferredId;
+    if (!id) return;
+    toggleDeferredSelection(id);
+    return;
+  }
+
+  // 打开分组设置弹框
+  if (action === 'open-group-settings') {
+    await openGroupSettingsModal();
+    return;
+  }
+
+  // 从选中列表移除
+  if (action === 'remove-selected-link') {
+    const id = actionEl.dataset.deferredId;
+    if (!id) return;
+    selectedDeferredIds.delete(id);
+    updateDeferredSelectionUI();
+    await updateSelectedLinksList();
+    return;
+  }
+
+  // 选择分组
+  if (action === 'select-group') {
+    // 分组标签的点击事件已在updateGroupTagsList中处理
+    return;
+  }
+
+  // 删除分组
+  if (action === 'delete-group') {
+    e.stopPropagation();
+    const groupName = actionEl.dataset.groupName;
+    if (!groupName) return;
+    if (confirm(`确定删除分组 "${groupName}"？`)) {
+      await deleteGroup(groupName);
+    }
+    return;
+  }
+
+  // 保存选中链接到分组
+  if (action === 'save-group') {
+    const selectedTag = document.querySelector('.group-tag.selected');
+    if (!selectedTag) {
+      showToast('请先选择分组');
+      return;
+    }
+    const groupName = selectedTag.dataset.groupName;
+    await saveSelectedToGroup(groupName);
+    return;
+  }
+
   if (action === 'close-domain-tabs') {
     const domainId = actionEl.dataset.domainId;
     const group = domainGroups.find(g =>
@@ -1805,6 +2216,70 @@ function applyTheme(theme) {
       t = setTimeout(commitSettings, 600);
     });
   }
+})();
+
+// ─── 分组设置弹框初始化 ─────────────────────────────────────────────────────
+(function initGroupSettings() {
+  const modal = document.getElementById('groupSettingsModal');
+  const close = document.getElementById('groupSettingsClose');
+  const backdrop = document.getElementById('groupSettingsBackdrop');
+  const addGroupBtn = document.getElementById('addGroupBtn');
+  const newGroupNameInput = document.getElementById('newGroupName');
+  const saveGroupBtn = document.getElementById('saveGroupBtn');
+
+  if (!modal) return;
+
+  // 关闭弹框
+  function closeModal() {
+    modal.style.display = 'none';
+  }
+
+  if (close) close.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  // 添加分组按钮
+  if (addGroupBtn) {
+    addGroupBtn.addEventListener('click', async () => {
+      const groupName = newGroupNameInput ? newGroupNameInput.value.trim() : '';
+      if (!groupName) {
+        showToast('请输入分组名称');
+        return;
+      }
+      await addNewGroup(groupName);
+      if (newGroupNameInput) newGroupNameInput.value = '';
+    });
+  }
+
+  // 回车添加分组
+  if (newGroupNameInput) {
+    newGroupNameInput.addEventListener('keypress', async (e) => {
+      if (e.key === 'Enter') {
+        const groupName = newGroupNameInput.value.trim();
+        if (!groupName) {
+          showToast('请输入分组名称');
+          return;
+        }
+        await addNewGroup(groupName);
+        newGroupNameInput.value = '';
+      }
+    });
+  }
+
+  // 保存分组按钮
+  if (saveGroupBtn) {
+    saveGroupBtn.addEventListener('click', async () => {
+      const selectedTag = document.querySelector('.group-tag.selected');
+      if (!selectedTag) {
+        showToast('请先选择分组');
+        return;
+      }
+      const groupName = selectedTag.dataset.groupName;
+      await saveSelectedToGroup(groupName);
+    });
+  }
+
+  // 加载分组数据
+  loadDeferredGroups();
 })();
 
 

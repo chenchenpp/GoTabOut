@@ -1029,7 +1029,7 @@ header {
   padding: 12px 24px;
   border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  z-index: 100;
+  z-index: 10000;
   opacity: 0;
   transition:
     transform 0.4s var(--ease-out-expo),
@@ -1601,6 +1601,321 @@ body.no-entrance-anim footer {
   gap: 6px;
   margin-bottom: 10px;
   flex-wrap: wrap;
+}
+
+/* 分组设置按钮 */
+.group-settings-btn {
+  margin-left: auto;
+  padding: 6px;
+  background: transparent;
+  border: 1px solid var(--warm-gray);
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.group-settings-btn:hover {
+  background: var(--warm-gray);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+
+.group-settings-btn.has-selection {
+  background: var(--accent-amber);
+  color: white;
+  border-color: var(--accent-amber);
+}
+
+/* Deferred item 选中状态 */
+.deferred-item {
+  cursor: pointer;
+}
+
+.deferred-checkbox-wrapper {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.deferred-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--warm-gray);
+  border-radius: 4px;
+  background: var(--card-bg);
+  transition: all 0.15s;
+  position: relative;
+}
+
+.deferred-item:hover .deferred-checkbox {
+  border-color: var(--accent-sage);
+}
+
+.deferred-item.selected .deferred-checkbox {
+  background: var(--accent-sage);
+  border-color: var(--accent-sage);
+}
+
+.deferred-item.selected .deferred-checkbox::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* 分组设置弹框样式 */
+.selected-links-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--warm-gray);
+  border-radius: 6px;
+  background: var(--paper);
+  padding: 8px;
+}
+
+.selected-links-empty {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 12px;
+}
+
+.selected-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.selected-link-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--card-bg);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.selected-link-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.selected-link-group {
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--warm-gray);
+  padding: 2px 6px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.selected-link-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.selected-link-remove:hover {
+  color: var(--accent-red);
+}
+
+/* 添加分组行 */
+.add-group-row {
+  display: flex;
+  gap: 8px;
+}
+
+.add-group-btn {
+  padding: 8px 12px;
+  background: var(--accent-sage);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.add-group-btn:hover {
+  opacity: 0.85;
+}
+
+/* 分组标签容器 */
+.group-tags-container {
+  min-height: 60px;
+}
+
+.group-tags-empty {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 16px;
+}
+
+.group-tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 分组标签 */
+.group-tag {
+  position: relative;
+  padding: 2px 6px;
+  background: var(--warm-gray);
+  color: var(--ink);
+  border: 1px solid transparent;
+  border-radius: 16px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+}
+
+.group-tag:hover {
+  background: var(--accent-amber);
+  color: white;
+}
+
+.group-tag.selected {
+  background: var(--accent-amber);
+  color: white;
+  border-color: var(--accent-amber);
+}
+
+.group-tag-delete {
+  position: absolute;
+  right: -4px;
+  top: 2px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  transition: opacity 0.15s;
+  width: 14px;
+}
+
+.group-tag:hover .group-tag-delete {
+  opacity: 1;
+}
+
+/* 保存分组按钮 */
+.save-group-btn {
+  width: 100%;
+  padding: 10px;
+  background: var(--accent-amber);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+
+.save-group-btn:hover {
+  opacity: 0.9;
+}
+
+/* 分组模块样式 */
+.deferred-group {
+  margin-bottom: 12px;
+  border: 1px solid var(--warm-gray);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.deferred-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--paper);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s;
+}
+
+.deferred-group-header:hover {
+  background: var(--warm-gray);
+}
+
+.deferred-group-header.collapsed .deferred-group-chevron {
+  transform: rotate(-90deg);
+}
+
+.deferred-group-chevron {
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.deferred-group-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  flex: 1;
+}
+
+.deferred-group-count {
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--warm-gray);
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.deferred-group-body {
+  padding: 8px 12px;
+  background: var(--card-bg);
+  border-top: 1px solid var(--warm-gray);
+}
+
+.deferred-group-body .deferred-item {
+  padding: 8px 0;
+}
+
+.deferred-group-body .deferred-item:first-child {
+  padding-top: 4px;
+}
+
+.deferred-group-body .deferred-item:last-child {
+  border-bottom: none;
+  padding-bottom: 4px;
 }
 
 /* Archive items are simpler — just title + domain + date */
