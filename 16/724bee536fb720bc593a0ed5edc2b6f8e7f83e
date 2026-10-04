@@ -1,0 +1,14 @@
+extension/style.css
+  h_7174130336f713 1906-1907
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "16724bee536fb720bc593a0ed5edc2b6f8e7f83e",
+  "prompts": {},
+  "humans": {
+    "h_7174130336f713": {
+      "author": "peng.chen2 <peng.chen2@rt-mart.com>"
+    }
+  }
+}
