@@ -1905,6 +1905,31 @@ body.no-entrance-anim footer {
   border-top: 1px solid var(--warm-gray);
   max-height: 400px;
   overflow-y: auto;
+  overflow-y: overlay;
+}
+
+/* 滚动条样式：默认隐藏，滚动时显示 */
+.deferred-group-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.deferred-group-body::-webkit-scrollbar-track {
+  background: transparent;
+
+}
+
+.deferred-group-body::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+.deferred-group-body:hover::-webkit-scrollbar-thumb {
+  background: var(--warm-gray);
+}
+
+.deferred-group-body::-webkit-scrollbar-thumb:hover {
+  background: var(--muted);
 }
 
 .deferred-group-body .deferred-item {
