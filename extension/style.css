@@ -10,32 +10,40 @@
   /* Easing curves — exponential deceleration, never bounce/elastic. */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-out-expo:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --ink:              light-dark(#1a1613, #f2ede5);
-  --paper:            light-dark(#f8f5f0, #1a1714);
-  --warm-gray:        light-dark(#e8e2da, #3a332e);
-  --muted:            light-dark(#8a7f75, #9e948a);
-  --accent-amber:     light-dark(#c8713a, #d88856);
-  --accent-sage:      light-dark(#5a7a62, #7fa487);
-  --accent-slate:     light-dark(#5a6b7a, #7f95a7);
-  --accent-rose:      light-dark(#b35a5a, #c98282);
-  --status-active:    light-dark(#3d7a4a, #5aa36c);
+  --ink: light-dark(#1a1613, #f2ede5);
+  --paper: light-dark(#f8f5f0, #1a1714);
+  --warm-gray: light-dark(#e8e2da, #3a332e);
+  --muted: light-dark(#8a7f75, #9e948a);
+  --accent-amber: light-dark(#c8713a, #d88856);
+  --accent-sage: light-dark(#5a7a62, #7fa487);
+  --accent-slate: light-dark(#5a6b7a, #7f95a7);
+  --accent-rose: light-dark(#b35a5a, #c98282);
+  --status-active: light-dark(#3d7a4a, #5aa36c);
   --status-abandoned: light-dark(#b35a5a, #c98282);
-  --card-bg:          light-dark(#fffdf9, #24201b);
-  --card-bg-hover:    light-dark(#fffdf9, #2d2822);
-  --shadow:           light-dark(rgba(26, 22, 19, 0.06), rgba(0, 0, 0, 0.35));
-  --shadow-hover:     light-dark(rgba(26, 22, 19, 0.28), rgba(0, 0, 0, 0.6));
+  --card-bg: light-dark(#fffdf9, #24201b);
+  --card-bg-hover: light-dark(#fffdf9, #2d2822);
+  --shadow: light-dark(rgba(26, 22, 19, 0.06), rgba(0, 0, 0, 0.35));
+  --shadow-hover: light-dark(rgba(26, 22, 19, 0.28), rgba(0, 0, 0, 0.6));
 }
 
 /* Manual override — toggle button sets data-theme on <html> and flips color-scheme. */
-[data-theme="light"] { color-scheme: light; }
-[data-theme="dark"]  { color-scheme: dark; }
+[data-theme="light"] {
+  color-scheme: light;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+}
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   background: var(--paper);
   color: var(--ink);
   min-height: 100vh;
@@ -63,7 +71,7 @@ body {
 
 /* Subtle paper texture */
 body::before {
-  content: '';
+  content: "";
   position: fixed;
   inset: 0;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
@@ -116,7 +124,7 @@ header {
 }
 
 .header-text h1 {
-  font-family: 'Newsreader', serif;
+  font-family: "Newsreader", serif;
   font-weight: 300;
   font-size: 28px;
   letter-spacing: -0.5px;
@@ -142,7 +150,9 @@ header {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s, background 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s;
 }
 
 .header-controls {
@@ -201,7 +211,7 @@ header {
 }
 
 .settings-header h2 {
-  font-family: 'Newsreader', serif;
+  font-family: "Newsreader", serif;
   font-weight: 400;
   font-size: 18px;
   font-style: italic;
@@ -246,7 +256,7 @@ header {
 
 .settings-input,
 .settings-textarea {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 13px;
   padding: 8px 12px;
   border: 1px solid var(--warm-gray);
@@ -300,7 +310,7 @@ header {
 }
 
 .settings-checkbox::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 2px;
@@ -309,7 +319,7 @@ header {
   border-radius: 50%;
   background: var(--card-bg);
   transition: transform 0.2s var(--ease-out-quart);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 .settings-checkbox:checked {
@@ -339,6 +349,7 @@ header {
 }
 
 .tab-list-chip {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -350,10 +361,13 @@ header {
   background: var(--card-bg);
   color: var(--ink);
   font-size: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    box-shadow 0.15s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -364,6 +378,11 @@ header {
   background: var(--card-bg-hover);
   border-color: var(--accent-amber);
   box-shadow: 0 2px 6px var(--shadow);
+}
+.tab-list-chip:hover .nav-chip-close {
+  opacity: 1;
+  color: var(--status-abandoned);
+  background: rgba(179, 90, 90, 0.08);
 }
 
 .tab-list-chip .chip-favicon {
@@ -382,6 +401,35 @@ header {
   white-space: nowrap;
 }
 
+/* Nav chip 关闭按钮 - 定位右上角 */
+.tab-list-chip .nav-chip-close {
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  display: none;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.35;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    background 0.15s;
+  z-index: 1;
+}
+
+.tab-list-chip .nav-chip-close svg {
+  width: 10px;
+  height: 10px;
+}
+
+.tab-list-chip:hover .nav-chip-close {
+  display: inline-flex;
+}
+
 .tab-list-more {
   display: inline-flex;
   align-items: center;
@@ -392,9 +440,11 @@ header {
   background: var(--card-bg);
   color: var(--muted);
   font-size: 12px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   flex-shrink: 0;
   position: relative;
 }
@@ -451,7 +501,11 @@ header {
 
 /* ---- Tab cleanup banner ---- */
 .tab-cleanup-banner {
-  background: linear-gradient(135deg, rgba(200, 113, 58, 0.04), rgba(200, 113, 58, 0.09));
+  background: linear-gradient(
+    135deg,
+    rgba(200, 113, 58, 0.04),
+    rgba(200, 113, 58, 0.09)
+  );
   border: 1px solid rgba(200, 113, 58, 0.18);
   border-radius: 8px;
   padding: 16px 24px;
@@ -495,7 +549,7 @@ header {
 }
 
 .tab-cleanup-btn {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 12px;
   font-weight: 600;
   padding: 8px 20px;
@@ -504,7 +558,9 @@ header {
   background: var(--accent-amber);
   color: white;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.2s;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
   white-space: nowrap;
 }
 
@@ -524,7 +580,7 @@ header {
 }
 
 .section-header h2 {
-  font-family: 'Newsreader', serif;
+  font-family: "Newsreader", serif;
   font-weight: 400;
   font-size: 18px;
   font-style: italic;
@@ -568,7 +624,9 @@ header {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: box-shadow 0.25s var(--ease-out-quart), background-color 0.2s var(--ease-out-quart);
+  transition:
+    box-shadow 0.25s var(--ease-out-quart),
+    background-color 0.2s var(--ease-out-quart);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -576,7 +634,7 @@ header {
 
 /* Colored top border instead of side bar for grid cards */
 .mission-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -585,9 +643,15 @@ header {
   background: var(--warm-gray);
 }
 
-.mission-card.has-active-bar::before { background: var(--status-active); }
-.mission-card.has-amber-bar::before { background: var(--accent-amber); }
-.mission-card.has-neutral-bar::before { background: var(--warm-gray); }
+.mission-card.has-active-bar::before {
+  background: var(--status-active);
+}
+.mission-card.has-amber-bar::before {
+  background: var(--accent-amber);
+}
+.mission-card.has-neutral-bar::before {
+  background: var(--warm-gray);
+}
 
 .mission-card:hover {
   background: var(--card-bg-hover);
@@ -598,7 +662,9 @@ header {
 .mission-card.closing {
   opacity: 0;
   transform: scale(0.9);
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
   pointer-events: none;
 }
 
@@ -752,7 +818,10 @@ header {
   padding: 4px;
   border-radius: 4px;
   opacity: 0.35;
-  transition: opacity 0.15s, color 0.15s, background 0.15s;
+  transition:
+    opacity 0.15s,
+    color 0.15s,
+    background 0.15s;
   flex-shrink: 0;
 }
 
@@ -802,7 +871,7 @@ header {
 
 .mission-page-count {
   font-size: 20px;
-  font-family: 'Newsreader', serif;
+  font-family: "Newsreader", serif;
   font-weight: 300;
   color: var(--ink);
   line-height: 1;
@@ -824,7 +893,7 @@ header {
 
 .action-btn {
   font-size: 11px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-weight: 500;
   padding: 5px 14px;
   border-radius: 4px;
@@ -832,7 +901,10 @@ header {
   background: var(--card-bg);
   color: var(--muted);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background-color 0.2s;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -897,15 +969,17 @@ header {
   transform: translateX(-50%) translateY(80px);
   background: var(--ink);
   color: var(--paper);
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 13px;
   font-weight: 500;
   padding: 12px 24px;
   border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   z-index: 100;
   opacity: 0;
-  transition: transform 0.4s var(--ease-out-expo), opacity 0.4s var(--ease-out-expo);
+  transition:
+    transform 0.4s var(--ease-out-expo),
+    opacity 0.4s var(--ease-out-expo);
   pointer-events: none;
   display: flex;
   align-items: center;
@@ -943,7 +1017,7 @@ footer {
 }
 
 .stat-num {
-  font-family: 'Newsreader', serif;
+  font-family: "Newsreader", serif;
   font-size: 28px;
   font-weight: 300;
   color: var(--ink);
@@ -986,7 +1060,7 @@ footer {
 }
 
 .refresh-btn {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 11px;
   font-weight: 500;
   color: var(--accent-amber);
@@ -999,24 +1073,50 @@ footer {
 
 /* ---- Animations ---- */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-header { animation: fadeUp 0.5s ease both; }
-.tab-cleanup-banner { animation: fadeUp 0.5s ease 0.1s both; }
-.active-section .section-header { animation: fadeUp 0.5s ease 0.2s both; }
+header {
+  animation: fadeUp 0.5s ease both;
+}
+.tab-cleanup-banner {
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+.active-section .section-header {
+  animation: fadeUp 0.5s ease 0.2s both;
+}
 /* Mission-slot animations removed — in Safari, the compositor layer they
    leave behind caused hover-paint flicker after another card was removed
    and the column rebalanced. Section headers still animate. */
-footer { animation: fadeUp 0.5s ease 0.65s both; }
+footer {
+  animation: fadeUp 0.5s ease 0.65s both;
+}
 
-.deferred-list .deferred-item:nth-child(1) { animation-delay: 0.05s; }
-.deferred-list .deferred-item:nth-child(2) { animation-delay: 0.1s; }
-.deferred-list .deferred-item:nth-child(3) { animation-delay: 0.15s; }
-.deferred-list .deferred-item:nth-child(4) { animation-delay: 0.2s; }
-.deferred-list .deferred-item:nth-child(5) { animation-delay: 0.25s; }
-.deferred-column .section-header { animation: fadeUp 0.5s ease 0.1s both; }
+.deferred-list .deferred-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.deferred-list .deferred-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.deferred-list .deferred-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.deferred-list .deferred-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.deferred-list .deferred-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.deferred-column .section-header {
+  animation: fadeUp 0.5s ease 0.1s both;
+}
 
 /* Suppress entrance animations on live re-renders so cards don't flicker
    every time a tab event fires. The JS adds .no-entrance-anim after the
@@ -1030,7 +1130,6 @@ body.no-entrance-anim .missions-empty-state,
 body.no-entrance-anim footer {
   animation: none !important;
 }
-
 
 /* ================================================================
    STATIC DEFAULT VIEW — new elements added for "AI on demand"
@@ -1071,8 +1170,14 @@ body.no-entrance-anim footer {
 }
 
 @keyframes emptyStateIn {
-  from { opacity: 0; transform: translate(-50%, -50%) translateY(12px); }
-  to   { opacity: 1; transform: translate(-50%, -50%); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
 
 /* CSS-drawn checkmark in a glowing circle.
@@ -1086,8 +1191,9 @@ body.no-entrance-anim footer {
   border: 1.5px solid color-mix(in oklch, var(--accent-sage) 35%, transparent);
 
   /* Soft sage glow */
-  box-shadow: 0 0 0 8px color-mix(in oklch, var(--accent-sage) 6%, transparent),
-              0 0 0 16px color-mix(in oklch, var(--accent-sage) 3%, transparent);
+  box-shadow:
+    0 0 0 8px color-mix(in oklch, var(--accent-sage) 6%, transparent),
+    0 0 0 16px color-mix(in oklch, var(--accent-sage) 3%, transparent);
 
   display: flex;
   align-items: center;
@@ -1105,12 +1211,18 @@ body.no-entrance-anim footer {
 }
 
 @keyframes checkPop {
-  from { transform: scale(0.6); opacity: 0; }
-  to   { transform: scale(1);   opacity: 1; }
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .empty-title {
-  font-family: 'Newsreader', serif;
+  font-family: "Newsreader", serif;
   font-size: 20px;
   font-weight: 400;
   font-style: italic;
@@ -1124,7 +1236,6 @@ body.no-entrance-anim footer {
   font-weight: 400;
   letter-spacing: 0.3px;
 }
-
 
 /* ================================================================
    SAVED FOR LATER — Checklist Column + Archive
@@ -1224,7 +1335,9 @@ body.no-entrance-anim footer {
   cursor: pointer;
   flex-shrink: 0;
   margin-top: 1px;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
   position: relative;
 }
 
@@ -1239,7 +1352,7 @@ body.no-entrance-anim footer {
 
 /* Checkmark inside the checkbox */
 .deferred-checkbox:checked::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 2px;
   left: 5px;
@@ -1297,7 +1410,9 @@ body.no-entrance-anim footer {
   cursor: pointer;
   padding: 2px;
   opacity: 0.3;
-  transition: opacity 0.15s, color 0.15s;
+  transition:
+    opacity 0.15s,
+    color 0.15s;
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -1317,7 +1432,9 @@ body.no-entrance-anim footer {
 .archive-item.removing {
   opacity: 0;
   transform: translateX(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
 }
 
 /* ---- Empty state ---- */
@@ -1337,7 +1454,7 @@ body.no-entrance-anim footer {
 }
 
 .archive-toggle {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 12px;
   font-weight: 500;
   color: var(--muted);
@@ -1378,7 +1495,7 @@ body.no-entrance-anim footer {
 }
 
 .archive-search {
-  font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
   font-size: 12px;
   width: 100%;
   padding: 8px 12px;

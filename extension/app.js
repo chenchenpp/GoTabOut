@@ -668,6 +668,7 @@ async function renderTabList() {
     return `<a href="${safeUrl}" target="_blank" rel="noopener" class="tab-list-chip" title="${safeTitle}">
       ${faviconUrl ? `<span class="chip-favicon" style="background-image:url('${faviconUrl}')" aria-hidden="true"></span>` : ''}
       <span class="chip-text">${safeTitle}</span>
+      <button class="nav-chip-close chip-action chip-close" data-action="remove-nav-item" data-nav-url="${safeUrl}" title="Remove" aria-label="Remove ${safeTitle}">${ICONS.chipClose}</button>
     </a>`;
   }).join('');
 
@@ -1208,6 +1209,24 @@ document.addEventListener('click', async (e) => {
   }
 
   const card = actionEl.closest('.mission-card');
+
+  if (action === 'remove-nav-item') {
+    e.preventDefault();
+    e.stopPropagation(); // 阻止触发 <a> 链接跳转
+    const navUrl = actionEl.dataset.navUrl;
+    if (!navUrl) return;
+
+    try {
+      const settings = await getSettings();
+      settings.tabListItems = settings.tabListItems.filter(i => i.url !== navUrl);
+      await saveSettings(settings);
+      await renderTabList();
+      showToast('Removed from Nav list');
+    } catch (err) {
+      if (DEBUG) console.error('[tab-out] Failed to remove nav item:', err);
+    }
+    return;
+  }
 
   if (action === 'expand-chips') {
     const overflow = actionEl.parentElement.querySelector('.page-chips-overflow');
