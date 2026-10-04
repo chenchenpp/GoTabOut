@@ -1,0 +1,14 @@
+extension/app.js
+  h_7174130336f713 360-362
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f01fe066e6945d6744617f472b52a9c73b0180b1",
+  "prompts": {},
+  "humans": {
+    "h_7174130336f713": {
+      "author": "peng.chen2 <peng.chen2@rt-mart.com>"
+    }
+  }
+}
