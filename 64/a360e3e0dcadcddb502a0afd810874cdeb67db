@@ -1,0 +1,21 @@
+extension/app.js
+  s_892941ed709623::t_195690077e11c8 672,676,695,698-706,716-718,723-725,727-734,739-744,750-790,792,802,813-814
+extension/style.css
+  s_892941ed709623::t_5f5811459bb268 477-481
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "64a360e3e0dcadcddb502a0afd810874cdeb67db",
+  "prompts": {},
+  "sessions": {
+    "s_892941ed709623": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1bbe7489-9e92-4ef2-bce5-365dca0546cf",
+        "model": "unknown"
+      },
+      "human_author": "peng.chen2 <peng.chen2@rt-mart.com>"
+    }
+  }
+}
