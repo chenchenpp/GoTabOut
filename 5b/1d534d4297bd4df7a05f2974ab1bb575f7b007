@@ -1,0 +1,19 @@
+extension/style.css
+  s_892941ed709623::t_e8e85f972cb930 1305,1406-1430
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "5b1d534d4297bd4df7a05f2974ab1bb575f7b007",
+  "prompts": {},
+  "sessions": {
+    "s_892941ed709623": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1bbe7489-9e92-4ef2-bce5-365dca0546cf",
+        "model": "unknown"
+      },
+      "human_author": "peng.chen2 <peng.chen2@rt-mart.com>"
+    }
+  }
+}
