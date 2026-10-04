@@ -558,6 +558,7 @@ const ICONS = {
   bookmark:  svg(2,   'M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z'),
   checkmark: svg(1.5, 'm4.5 12.75 6 6 9-13.5'),
   sun:       svg(1.5, 'M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z'),
+  edit:      svg(2,   'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z'),
 };
 
 
@@ -1025,6 +1026,7 @@ function renderDeferredItem(item) {
           <span>${ago}</span>
         </div>
       </div>
+      <button class="deferred-edit" data-action="edit-deferred-title" data-deferred-id="${item.id}" aria-label="Edit title" title="Edit title">${ICONS.edit}</button>
       <button class="deferred-dismiss" data-action="dismiss-deferred" data-deferred-id="${item.id}" aria-label="Dismiss ${safeTitle}" title="Dismiss">${ICONS.close}</button>
     </div>`;
 }
@@ -1402,6 +1404,28 @@ document.addEventListener('click', async (e) => {
     await chrome.storage.local.set({ deferred });
     await renderDeferredColumn();
     showToast(`Cleared ${items.length} ${noun}${plural}`);
+    return;
+  }
+
+  if (action === 'edit-deferred-title') {
+    const id = actionEl.dataset.deferredId;
+    if (!id) return;
+
+    try {
+      const { deferred = [] } = await chrome.storage.local.get('deferred');
+      const item = deferred.find(t => t.id === id);
+      if (!item) return;
+
+      const newTitle = prompt('修改新名称:', item.title || item.url);
+      if (newTitle !== null && newTitle.trim() !== '') {
+        item.title = newTitle.trim();
+        await chrome.storage.local.set({ deferred });
+        await renderDeferredColumn();
+        showToast('Title updated');
+      }
+    } catch (err) {
+      if (DEBUG) console.error('[tab-out] Failed to edit title:', err);
+    }
     return;
   }
 
