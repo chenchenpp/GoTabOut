@@ -1,0 +1,29 @@
+CLAUDE.md
+  s_892941ed709623::t_fd26eef2eea0cf 1-61
+extension/index.html
+  s_982712e823a2eb::t_0b96791e856aec 184-239
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "149ed481da0ef29fe039f8a58a20a42ebd0840a7",
+  "prompts": {},
+  "sessions": {
+    "s_892941ed709623": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1bbe7489-9e92-4ef2-bce5-365dca0546cf",
+        "model": "unknown"
+      },
+      "human_author": "peng.chen2 <peng.chen2@rt-mart.com>"
+    },
+    "s_982712e823a2eb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0f8e3e45-15f2-438d-b309-f50dd1141398",
+        "model": "unknown"
+      },
+      "human_author": "peng.chen2 <peng.chen2@rt-mart.com>"
+    }
+  }
+}
