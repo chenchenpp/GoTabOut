@@ -1903,6 +1903,8 @@ body.no-entrance-anim footer {
   padding: 8px 12px;
   background: var(--card-bg);
   border-top: 1px solid var(--warm-gray);
+  max-height: 400px;
+  overflow-y: auto;
 }
 
 .deferred-group-body .deferred-item {
