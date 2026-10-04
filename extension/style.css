@@ -474,6 +474,11 @@ header {
   opacity: 0.4;
 }
 
+.tab-list-chip.drag-ready {
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
 .tab-list-chip.drag-over {
   border-color: var(--accent-amber);
   background: rgba(200, 113, 58, 0.08);

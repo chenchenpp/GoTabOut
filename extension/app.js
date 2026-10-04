@@ -669,11 +669,11 @@ async function renderTabList() {
     const faviconUrl = faviconFor(hostname, '');
     const safeUrl = item.url.replace(/"/g, '&quot;');
     const safeTitle = (item.title || item.url).replace(/"/g, '&quot;');
-    return `<a href="${safeUrl}" target="_blank" rel="noopener" class="tab-list-chip" draggable="true" data-nav-index="${idx}" title="${safeTitle}">
+    return `<div class="tab-list-chip" draggable="true" data-nav-index="${idx}" data-nav-url="${safeUrl}" title="${safeTitle}">
       ${faviconUrl ? `<span class="chip-favicon" style="background-image:url('${faviconUrl}')" aria-hidden="true"></span>` : ''}
       <span class="chip-text">${safeTitle}</span>
       <button class="nav-chip-close chip-action chip-close" data-action="remove-nav-item" data-nav-url="${safeUrl}" title="Remove" aria-label="Remove ${safeTitle}">${ICONS.chipClose}</button>
-    </a>`;
+    </div>`;
   }).join('');
 
   html += `<div class="tab-list-more" id="tabListMore" role="button" tabindex="0" aria-label="More bookmarks" title="More" style="display:none">
@@ -692,10 +692,18 @@ async function renderTabList() {
     });
   }
 
-  // Bind chip clicks: collapse back to single line when expanded
+  // Bind chip clicks: open link in new tab, collapse if expanded
   const chips = container.querySelectorAll('.tab-list-chip');
   chips.forEach(chip => {
-    chip.addEventListener('click', () => {
+    chip.addEventListener('click', (e) => {
+      // 如果点击的是关闭按钮，不触发链接打开
+      if (e.target.closest('.nav-chip-close')) return;
+
+      const url = chip.dataset.navUrl;
+      if (url) {
+        window.open(url, '_blank', 'noopener');
+      }
+
       if (_navListExpanded) {
         _navListExpanded = false;
         _reflowNavList();
@@ -705,23 +713,83 @@ async function renderTabList() {
 
   // Bind drag events for reordering
   let dragSrcIndex = null;
+  let currentDropIndex = null;
+  let chipWidths = []; // 缓存所有 chip 宽度
+
   chips.forEach(chip => {
     chip.addEventListener('dragstart', (e) => {
       dragSrcIndex = parseInt(chip.dataset.navIndex, 10);
       e.dataTransfer.effectAllowed = 'move';
-      e.dataTransfer.setData('text/plain', dragSrcIndex);
+      // 清除原生链接拖拽数据，防止 <a> 标签的默认拖拽行为干扰
+      e.dataTransfer.clearData();
+      e.dataTransfer.setData('text/plain', String(dragSrcIndex));
       chip.classList.add('dragging');
+
+      // 缓存所有 chip 宽度（避免 dragover 中重复计算）
+      chipWidths = Array.from(chips).map(c => c.getBoundingClientRect().width + 8);
+
+      // 延迟添加 drag-ready 类，让其他 chips 准备位移
+      requestAnimationFrame(() => {
+        chips.forEach(c => c.classList.add('drag-ready'));
+      });
     });
 
     chip.addEventListener('dragend', () => {
       chip.classList.remove('dragging');
-      chips.forEach(c => c.classList.remove('drag-over'));
+      chips.forEach(c => {
+        c.classList.remove('drag-over', 'drag-ready');
+        c.style.transform = '';
+      });
+      currentDropIndex = null;
+      chipWidths = [];
     });
 
     chip.addEventListener('dragover', (e) => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'move';
+      const targetIndex = parseInt(chip.dataset.navIndex, 10);
+
+      if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+
+      // 使用缓存的宽度（避免 reflow）
+      const dragChipWidth = chipWidths[dragSrcIndex] || 0;
+
+      // 清除之前的位移状态
+      chips.forEach(c => {
+        c.classList.remove('shift-left', 'shift-right');
+        c.style.transform = '';
+      });
+
+      // 计算位移方向
+      const direction = dragSrcIndex < targetIndex ? 1 : -1;
+
+      // 对源和目标之间的 chips 应用位移（使用拖拽 chip 的宽度）
+      chips.forEach((c, idx) => {
+        if (idx === dragSrcIndex) return;
+
+        if (direction > 0 && idx > dragSrcIndex && idx <= targetIndex) {
+          // 向右拖拽：中间的 chips 向左移
+          c.style.transform = `translateX(-${dragChipWidth}px)`;
+        } else if (direction < 0 && idx >= targetIndex && idx < dragSrcIndex) {
+          // 向左拖拽：中间的 chips 向右移
+          c.style.transform = `translateX(${dragChipWidth}px)`;
+        }
+      });
+
+      // 拖拽的 chip 移动到目标位置，偏移量为中间所有 chips 的宽度累加（使用缓存）
+      const dragChip = chips[dragSrcIndex];
+      let offset = 0;
+      const start = Math.min(dragSrcIndex, targetIndex);
+      const end = Math.max(dragSrcIndex, targetIndex);
+      for (let i = start; i <= end; i++) {
+        if (i === dragSrcIndex) continue;
+        offset += chipWidths[i] || 0;
+      }
+      if (direction < 0) offset = -offset;
+      dragChip.style.transform = `translateX(${offset}px)`;
+
       chip.classList.add('drag-over');
+      currentDropIndex = targetIndex;
     });
 
     chip.addEventListener('dragleave', () => {
@@ -730,8 +798,8 @@ async function renderTabList() {
 
     chip.addEventListener('drop', async (e) => {
       e.preventDefault();
-      chip.classList.remove('drag-over');
       const targetIndex = parseInt(chip.dataset.navIndex, 10);
+      chip.classList.remove('drag-over');
 
       if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
 
@@ -742,7 +810,8 @@ async function renderTabList() {
         items.splice(targetIndex, 0, moved);
         settings.tabListItems = items;
         await saveSettings(settings);
-        await renderTabList();
+        // 延迟重渲染，等待 dragend 事件完成
+        setTimeout(() => renderTabList(), 50);
       } catch (err) {
         if (DEBUG) console.error('[tab-out] Failed to reorder nav items:', err);
       }
