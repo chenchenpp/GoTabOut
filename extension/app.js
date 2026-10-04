@@ -1169,10 +1169,7 @@ async function renderStaticDashboard() {
   if (domainGroups.length > 0 && openTabsSection) {
     if (openTabsSectionTitle) openTabsSectionTitle.textContent = 'Open tabs';
     openTabsMissionsEl.innerHTML = domainGroups.map(renderDomainCard).join('');
-    openTabsSection.style.display = 'block';
     updateDashboardCounts();
-  } else if (openTabsSection) {
-    openTabsSection.style.display = 'none';
   }
 
   checkTabOutDupes();
