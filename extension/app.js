@@ -559,6 +559,7 @@ const ICONS = {
   checkmark: svg(1.5, 'm4.5 12.75 6 6 9-13.5'),
   sun:       svg(1.5, 'M12 3v2.25m6.364.386-1.591 1.591M21 12h-2.25m-.386 6.364-1.591-1.591M12 18.75V21m-4.773-4.227-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z'),
   edit:      svg(2,   'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z'),
+  navAdd:    svg(2,   'M12 4.5v15m7.5-7.5h-15'),
 };
 
 
@@ -857,6 +858,7 @@ function renderPageChip(tab, urlCounts, groupDomain = '') {
     ${faviconUrl ? `<span class="chip-favicon" style="background-image:url('${faviconUrl}')" aria-hidden="true"></span>` : ''}
     <span class="chip-text">${label}</span>${dupeTag}
     <div class="chip-actions">
+      <button class="chip-action chip-nav-add" data-action="add-to-nav-list" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" aria-label="Add ${safeTitle} to Nav list" title="Add to Nav list">${ICONS.navAdd}</button>
       <button class="chip-action chip-save" data-action="defer-single-tab" data-tab-url="${safeUrl}" data-tab-title="${safeTitle}" aria-label="Save ${safeTitle} for later" title="Save for later">${ICONS.bookmark}</button>
       <button class="chip-action chip-close" data-action="close-single-tab" data-tab-url="${safeUrl}" aria-label="Close ${safeTitle}" title="Close this tab">${ICONS.chipClose}</button>
     </div>
@@ -1294,6 +1296,31 @@ document.addEventListener('click', async (e) => {
     }
 
     showToast('Tab closed');
+    return;
+  }
+
+  if (action === 'add-to-nav-list') {
+    e.stopPropagation();
+    const tabUrl = actionEl.dataset.tabUrl;
+    const tabTitle = actionEl.dataset.tabTitle || tabUrl;
+    if (!tabUrl) return;
+
+    try {
+      const settings = await getSettings();
+      // 检查是否已存在，避免重复
+      const exists = settings.tabListItems.some(i => i.url === tabUrl);
+      if (exists) {
+        showToast('Already in Nav list');
+        return;
+      }
+
+      settings.tabListItems.push({ url: tabUrl, title: tabTitle });
+      await saveSettings(settings);
+      await renderTabList();
+      showToast('Added to Nav list');
+    } catch (err) {
+      if (DEBUG) console.error('[tab-out] Failed to add to nav list:', err);
+    }
     return;
   }
 
