@@ -570,6 +570,8 @@ const DEFAULT_SETTINGS = {
   defaultPage: false,
   showTabList: true,
   tabListItems: [],
+  backgroundImage: '',
+  bgOpacity: 0.3,
 };
 
 async function getSettings() {
@@ -1649,6 +1651,7 @@ function applyTheme(theme) {
   const close = document.getElementById('settingsClose');
   const backdrop = document.getElementById('settingsBackdrop');
   const logoInput = document.getElementById('logoUrl');
+  const bgImageInput = document.getElementById('backgroundImage');
   const defaultToggle = document.getElementById('defaultPageToggle');
   const showTabListToggle = document.getElementById('showTabListToggle');
   const tabListTextarea = document.getElementById('tabListItems');
@@ -1658,6 +1661,7 @@ function applyTheme(theme) {
   async function loadSettingsIntoUI() {
     const settings = await getSettings();
     if (logoInput) logoInput.value = settings.logoUrl || '';
+    if (bgImageInput) bgImageInput.value = settings.backgroundImage || '';
     if (defaultToggle) defaultToggle.checked = !!settings.defaultPage;
     if (showTabListToggle) showTabListToggle.checked = settings.showTabList !== false;
     if (tabListTextarea) tabListTextarea.value = tabListItemsToText(settings.tabListItems);
@@ -1679,12 +1683,14 @@ function applyTheme(theme) {
   async function commitSettings() {
     const next = {
       logoUrl: logoInput ? logoInput.value.trim() : '',
+      backgroundImage: bgImageInput ? bgImageInput.value.trim() : '',
       defaultPage: defaultToggle ? defaultToggle.checked : false,
       showTabList: showTabListToggle ? showTabListToggle.checked : true,
       tabListItems: parseTabListItems(tabListTextarea ? tabListTextarea.value : ''),
     };
     await saveSettings(next);
     await renderTabList();
+    applyBackground(next.backgroundImage);
     showToast('Settings saved');
   }
 
@@ -1702,14 +1708,40 @@ function applyTheme(theme) {
     }
   }
 
+  // Apply background image
+  function applyBackground(imageUrl) {
+    let bgLayer = document.getElementById('backgroundLayer');
+
+    // 创建背景图层
+    if (!bgLayer) {
+      bgLayer = document.createElement('div');
+      bgLayer.id = 'backgroundLayer';
+      document.body.insertBefore(bgLayer, document.body.firstChild);
+    }
+
+    if (imageUrl) {
+      bgLayer.style.backgroundImage = `url('${imageUrl}')`;
+      bgLayer.style.display = 'block';
+      bgLayer.style.opacity = DEFAULT_SETTINGS.bgOpacity;
+    } else {
+      bgLayer.style.display = 'none';
+    }
+  }
+
   getSettings().then(settings => {
     applyLogo(settings.logoUrl);
+    applyBackground(settings.backgroundImage);
   });
 
   if (logoInput) {
     logoInput.addEventListener('change', async () => {
       await commitSettings();
       applyLogo(logoInput.value.trim());
+    });
+  }
+  if (bgImageInput) {
+    bgImageInput.addEventListener('change', async () => {
+      await commitSettings();
     });
   }
   if (defaultToggle) {
