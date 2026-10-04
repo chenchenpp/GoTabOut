@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "TabOut",
-  "version": "2.0",
+  "name": "GoTabOut",
+  "version": "3.0",
   "description": "优雅且轻松的管理您的标签页。一键管理已打开的标签页，按域名分组。新增导航列表、自定义LOGO，支持设置默认Tab页为TabOut",
   "permissions": ["tabs", "activeTab", "storage"],
   "background": { "service_worker": "background.js" },
   "action": {
-    "default_title": "TabOut",
+    "default_title": "GoTabOut",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png"

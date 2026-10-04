@@ -599,19 +599,46 @@ function parseTabListItems(rawText) {
     .split('\n')
     .map(s => s.trim())
     .filter(Boolean)
-    .map(url => {
-      try {
-        const u = new URL(url);
-        return { url, title: u.hostname.replace(/^www\./, '') };
-      } catch {
-        return { url, title: url };
+    .map(line => {
+      // 支持格式: "url 名称" 或 "url"
+      // 按第一个空格分割，第二部分为自定义名称
+      const spaceIdx = line.search(/\s/);
+      let url, title;
+
+      if (spaceIdx === -1) {
+        // 仅 URL，无自定义名称
+        url = line;
+        try {
+          title = new URL(url).hostname.replace(/^www\./, '');
+        } catch {
+          title = url;
+        }
+      } else {
+        url = line.slice(0, spaceIdx);
+        title = line.slice(spaceIdx + 1).trim();
       }
+
+      return { url, title };
     });
 }
 
 function tabListItemsToText(items) {
   if (!items || items.length === 0) return '';
-  return items.map(i => i.url).join('\n');
+  return items.map(item => {
+    // 判断 title 是否为自定义名称（与 hostname 不同）
+    let autoTitle = '';
+    try {
+      autoTitle = new URL(item.url).hostname.replace(/^www\./, '');
+    } catch {
+      autoTitle = item.url;
+    }
+
+    // 如果 title 与自动生成的 hostname 不同，说明是自定义名称
+    if (item.title && item.title !== autoTitle) {
+      return `${item.url} ${item.title}`;
+    }
+    return item.url;
+  }).join('\n');
 }
 
 let _navListResizeBound = false;
